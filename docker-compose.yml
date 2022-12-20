@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-    dim-phonebook-node:
+    node:
         build:
             context: docker/development/node
         environment:
@@ -14,7 +14,7 @@ services:
         networks:
             - traefik-public
 
-    dim-node-cli:
+    node-cli:
         build:
             context: docker/development/node
         volumes:
@@ -22,7 +22,7 @@ services:
         networks:
             - traefik-public
 
-    dim-phonebook:
+    front:
         build:
             context: docker/development/nginx
         networks:
@@ -31,7 +31,7 @@ services:
             - traefik.enable=true
             - traefik.docker.network=traefik-public
             - traefik.http.routers.dim-phonebook.entrypoints=http
-            - traefik.http.routers.dim-phonebook.rule=Host(`frontend.localhost`) || Host(`front.localhost`)
+            - traefik.http.routers.dim-phonebook.rule=Host(`front.pb.localhost`) || Host(`front.phonebook.localhost`)
             - traefik.http.services.dim-phonebook.loadBalancer.server.port=80
 
 networks:

@@ -41,23 +41,23 @@ frontend-clear:
 frontend-init: frontend-npm-install
 
 frontend-npm-install:
-	docker compose run --rm dim-node-cli npm instal
+	docker compose run --rm node-cli npm instal
 
 frontend-ready:
 	docker run --rm -v ${PWD}:/app -w /app alpine touch .ready
 
 frontend-lint:
-	docker compose run --rm dim-node-cli yarn eslint
-	docker compose run --rm dim-node-cli yarn stylelint
+	docker compose run --rm node-cli yarn eslint
+	docker compose run --rm node-cli yarn stylelint
 
 frontend-lint-fix:
-	docker compose run --rm dim-node-cli yarn eslint-fix
+	docker compose run --rm node-cli yarn eslint-fix
 
 frontend-test-watch:
-	docker compose run --rm dim-node-cli yarn test
+	docker compose run --rm node-cli yarn test
 
 frontend-test:
-	docker compose run --rm dim-node-cli yarn test --watchAll=false
+	docker compose run --rm node-cli yarn test --watchAll=false
 
 build: build-frontend
 
