@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+    mainpage:
+        image: ${REGISTRY}/phonebook-dim:${IMAGE_TAG}
+        environment:
+            REACT_APP_API_URL: https://api.herman.team/api/v1/
+        networks:
+            - traefik-public
+        deploy:
+            labels:
+                - traefik.enable=true
+                - traefik.docker.network=traefik-public
+                - traefik.constraint-label=traefik-public
+                - traefik.http.routers.phonebook-dim-http.rule=Host(`dim.pb.herman.team`)
+                - traefik.http.routers.phonebook-dim-http.entrypoints=http
+                - traefik.http.routers.phonebook-dim-http.middlewares=https-redirect
+                - traefik.http.routers.phonebook-dim-https.rule=Host(`dim.pb.herman.team`)
+                - traefik.http.routers.phonebook-dim-https.entrypoints=https
+                - traefik.http.routers.phonebook-dim-https.tls=true
+                - traefik.http.routers.phonebook-dim-https.tls.certresolver=le
+                - traefik.http.services.phonebook-dim.loadbalancer.server.port=80
+            placement:
+                    constraints:
+                        - node.labels.phonebook-dim.manager == true
+
+networks:
+    traefik-public:
+        external: true

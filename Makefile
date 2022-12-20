@@ -41,28 +41,28 @@ frontend-clear:
 frontend-init: frontend-npm-install
 
 frontend-npm-install:
-	docker compose run --rm node-cli npm instal
+	docker compose run --rm phonebook-dim-node-cli npm instal
 
 frontend-ready:
 	docker run --rm -v ${PWD}:/app -w /app alpine touch .ready
 
 frontend-lint:
-	docker compose run --rm node-cli yarn eslint
-	docker compose run --rm node-cli yarn stylelint
+	docker compose run --rm phonebook-dim-node-cli npm run lint
+#	docker compose run --rm phonebook-dim-node-cli yarn stylelint
 
 frontend-lint-fix:
-	docker compose run --rm node-cli yarn eslint-fix
+	docker compose run --rm phonebook-dim-node-cli yarn eslint-fix
 
 frontend-test-watch:
-	docker compose run --rm node-cli yarn test
+	docker compose run --rm phonebook-dim-node-cli yarn test
 
 frontend-test:
-	docker compose run --rm node-cli yarn test --watchAll=false
+	docker compose run --rm phonebook-dim-node-cli yarn test --watchAll=false
 
 build: build-frontend
 
 build-frontend:
-	docker --log-level=debug build --pull --file=docker/production/nginx/Dockerfile --tag=${REGISTRY}/dim-phonebook:${IMAGE_TAG} ./
+	docker --log-level=debug build --pull --file=docker/production/nginx/Dockerfile --tag=${REGISTRY}/phonebook-dim:${IMAGE_TAG} ./
 
 try-build:
 	REGISTRY=localhost IMAGE_TAG=0 make build
@@ -70,19 +70,19 @@ try-build:
 push: push-frontend
 
 push-frontend:
-	docker push ${REGISTRY}/dim-phonebook:${IMAGE_TAG}
+	docker push ${REGISTRY}/phonebook-dim:${IMAGE_TAG}
 
 deploy:
 	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'docker network create --driver=overlay --attachable traefik-public || true'
-	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'docker node update --label-add dim-phonebook.manager=true $$(docker info -f "{{.Swarm.NodeID}}")'
-	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'rm -rf site_dim_phonebook_${BUILD_NUMBER} && mkdir site_dim_phonebook_${BUILD_NUMBER}'
+	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'docker node update --label-add phonebook-dim.manager=true $$(docker info -f "{{.Swarm.NodeID}}")'
+	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'rm -rf site_phonebook_dim${BUILD_NUMBER} && mkdir site_phonebook_dim${BUILD_NUMBER}'
 	envsubst < docker-compose-production.yml > docker-compose-production-env.yml
-	scp -o StrictHostKeyChecking=no -P ${PORT} docker-compose-production-env.yml deploy@${HOST}:site_dim_phonebook_${BUILD_NUMBER}/docker-compose.yml
+	scp -o StrictHostKeyChecking=no -P ${PORT} docker-compose-production-env.yml deploy@${HOST}:site_phonebook_dim${BUILD_NUMBER}/docker-compose.yml
 	rm -f docker-compose-production-env.yml
-	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'cd site_dim_phonebook_${BUILD_NUMBER} && docker stack deploy  --compose-file docker-compose.yml mainpage --with-registry-auth --prune'
+	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'cd site_phonebook_dim${BUILD_NUMBER} && docker stack deploy  --compose-file docker-compose.yml phonebook-dim --with-registry-auth --prune'
 
 deploy-clean:
 	rm -f docker-compose-production-env.yml
 
 rollback:
-	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'cd site_dim_phonebook_${BUILD_NUMBER} && docker stack deploy --compose-file docker-compose.yml mainpage --with-registry-auth --prune'
+	ssh -o StrictHostKeyChecking=no deploy@${HOST} -p ${PORT} 'cd site_phonebook_dim${BUILD_NUMBER} && docker stack deploy --compose-file docker-compose.yml phonebook-dim --with-registry-auth --prune'
